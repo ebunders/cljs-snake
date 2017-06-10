@@ -24,7 +24,7 @@ body {
     color: rgba(255, 255, 255, 0.5);
     font-size: 20px;
     font-weight: bold;
-    padding-top: 100px;
+    padding-top: 20px;
     text-align: center;
 }
 
@@ -34,12 +34,13 @@ body {
     margin: auto;
     position: absolute;
     right: 0;
-    top: 0;
+    top: 60px;
     z-index: 2;
 }
 
 .cell {
-    background-color: rgba(0, 0, 0, 0.15);;
+    /*background-color: rgba(0, 0, 0, 0.15);;*/
+    background-color: rgba(255,0,0,0.3);;
 }
 
 .snake-on-cell {

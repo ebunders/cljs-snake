@@ -2,7 +2,9 @@
   (:require-macros [reagent.ratom :refer [reaction]])
   (:require [reagent.core :as reagent :refer [atom]]
             [re-frame.core :refer [register-handler register-sub subscribe dispatch dispatch-sync]]
-            [goog.events :as events]))
+            [goog.events :as events]
+            [snake-game.view :as view]
+            [snake-game.logic :as logic]))
 
 (enable-console-print!)
 
@@ -10,7 +12,7 @@
 
 ;; define your app data so that it doesn't get over-written on reload
 
-(defonce app-state (atom {:text "Hello world!"}))
+;(defonce app-state (atom {:text "Hello world!"}))
 
 (defn on-js-reload []
   ;; optionally touch your app-state to force rerendering depending on
@@ -21,21 +23,67 @@
 (def snake {:direction [1 0]
             :body [[3 2] [2 2] [1 2] [0 2]]})
 
-(defn random-free-position
-  "This function takes the snake and the board-size as arguments,
-  and returns a random position not colliding with the snake body"
-  [snake [x y]]
-  (let [snake-postions-set (into #{} (:body snake))
-       board-positions (for [x-pos (range x)
-                             y-pos (range y)]
-                         [x-pos y-pos])]
-  (when-let [free-positions (seq (remove snake-postions-set board-positions))]
-    (rand-nth free-positions))))
+
+
 
 
 (def initial-state {
                     :board board
                     :snake snake
-                    :point (random-free-position snake board)
+                    :point (logic/random-free-position snake board)
                     :points 0
                     :game-running? true})
+
+
+(register-handler
+ :initialize
+ (fn [db _]
+   (merge db initial-state)))
+
+
+
+
+(defn game
+  "the main rendering funciton"
+  []
+  [:div#foo
+   [view/render-board]
+   [view/render-score]
+   [view/render-game-over]])
+
+
+(defn run
+  "The main app function"
+  []
+  (dispatch-sync [:initialize])
+  (reagent/render [game]
+                  (.getElementById js/document "app")))
+
+(register-sub
+ :board
+ (fn
+   [db _]
+   (reaction (:board @db))))
+
+(register-sub
+ :snake
+ (fn [db _]
+   (reaction (:body (:snake @db)))))
+
+(register-sub
+ :point
+ (fn [db _]
+   (reaction (:point @db))))
+
+(register-sub
+  :points
+  (fn [db _]
+    (reaction (:points @db))))
+
+(register-sub
+  :game-running?
+  (fn [db _]
+    (reaction (:game-running? @db))))
+
+
+ (run)
