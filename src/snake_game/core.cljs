@@ -26,7 +26,6 @@
 
 
 
-
 (def initial-state {
                     :board board
                     :snake snake
@@ -35,12 +34,35 @@
                     :game-running? true})
 
 
+;;
+;; HANDLERS
+;;
+
+
 (register-handler
  :initialize
  (fn [db _]
    (merge db initial-state)))
 
+(register-handler
+  :next-state
+  (fn [db _]
+    (if (:game-running? db)
+          ;;(assoc db :snake (logic/move-snake (:snake db)))
+          (-> db
+              (update-in [:snake] logic/move-snake)
+              (as-> after-move
+                    (logic/process-move after-move)))
+          db)))
 
+
+(register-handler
+  :change-direction
+  (fn [db [_ new-direction]]
+    (if (:game-running? db)
+      (update-in db
+                 [:snake :direction]
+                 (partial logic/change-snake-direction new-direction)))))
 
 
 (defn game
@@ -58,6 +80,21 @@
   (dispatch-sync [:initialize])
   (reagent/render [game]
                   (.getElementById js/document "app")))
+
+(defonce snake-moving
+         (js/setInterval #(dispatch [:next-state]) 150))
+
+(defonce key-handler
+         (events/listen js/window "keydown"
+                        (fn [e]
+                          (let [key-code (.-keyCode e)]
+                            (if (contains? logic/key-code->move key-code)
+                              (dispatch [:change-direction (logic/key-code->move key-code)]))))))
+
+;;
+;; SUBSCRIPTIONS
+;;
+
 
 (register-sub
  :board
