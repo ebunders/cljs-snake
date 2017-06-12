@@ -45,6 +45,6 @@
     (fn [] (if @game-state
              [:div]
              [:div.overlay
-              [:div.play
+              [:div.play {:on-click #(dispatch [:initialize])}
                [:h1 "↺"]]]))))
 
