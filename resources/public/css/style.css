@@ -28,6 +28,14 @@ body {
     text-align: center;
 }
 
+.status{
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 20px;
+    font-weight: bold;
+    padding-top: 400px;
+    text-align: center;
+}
+
 .stage {
     bottom: 0;
     left: 0;
@@ -50,6 +58,8 @@ body {
 .point {
     background-color: rgb(119, 255, 51);
 }
+
+
 
 .overlay {
     position: absolute;

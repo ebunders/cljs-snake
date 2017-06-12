@@ -31,6 +31,12 @@
      (fn []
        [:div.score (str "Score: " @points)])))
 
+(defn render-state
+  "Render the status of the game"
+  []
+  (let [game-state (subscribe [:game-running?])]
+    [:div.status (str "Game: " (if game-state "Running" "Over"))]))
+
 
 (defn render-game-over
   "Render the game"

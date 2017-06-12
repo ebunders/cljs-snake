@@ -72,3 +72,20 @@
         (update-in [:points] inc)
         (assoc :point (random-free-position snake board)))
     db))
+
+(defn collisions
+  "Return true if a snake collision with the edge of the board or with itself is detected"
+  [snake board]
+  (let [{:keys [body direction]} snake
+        [x y] board
+        border-x #{x -1}
+        border-y #{y -1}
+
+        future-x (+ (first direction) (ffirst body))
+        future-y (+ (second direction) (second (first body)))
+        ]
+    (or
+      (contains? border-x future-x)
+      (contains? border-y future-y)
+      (contains? (into #{} (rest body)) [future-x future-y]))))
+

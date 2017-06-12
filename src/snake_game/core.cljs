@@ -18,19 +18,19 @@
   ;; optionally touch your app-state to force rerendering depending on
   ;; your application
   ;; (swap! app-state update-in [:__figwheel_counter] inc)
-)
+  )
 (def board [35 25])
 (def snake {:direction [1 0]
-            :body [[3 2] [2 2] [1 2] [0 2]]})
+            :body      [[3 2] [2 2] [1 2] [0 2]]})
 
 
 
 
 (def initial-state {
-                    :board board
-                    :snake snake
-                    :point (logic/random-free-position snake board)
-                    :points 0
+                    :board         board
+                    :snake         snake
+                    :point         (logic/random-free-position snake board)
+                    :points        0
                     :game-running? true})
 
 
@@ -40,20 +40,27 @@
 
 
 (register-handler
- :initialize
- (fn [db _]
-   (merge db initial-state)))
+  :initialize
+  (fn [db _]
+    (merge db initial-state)))
 
 (register-handler
   :next-state
-  (fn [db _]
-    (if (:game-running? db)
-          ;;(assoc db :snake (logic/move-snake (:snake db)))
-          (-> db
-              (update-in [:snake] logic/move-snake)
-              (as-> after-move
-                    (logic/process-move after-move)))
-          db)))
+  (fn [{:keys [snake board] :as db} _]
+    (let [update-game (fn [db]
+                        (-> db
+                            (update-in [:snake] logic/move-snake)
+                            (as-> after-move
+                                  (logic/process-move after-move))))]
+      (if (:game-running? db)
+        (if (logic/collisions snake board)
+          (assoc-in db [:game-running?] false)
+          (update-game db))
+        db
+        ))
+    ))
+
+
 
 
 (register-handler
@@ -71,7 +78,8 @@
   [:div#foo
    [view/render-board]
    [view/render-score]
-   [view/render-game-over]])
+   [view/render-game-over]
+   [view/render-state]])
 
 
 (defn run
@@ -97,20 +105,20 @@
 
 
 (register-sub
- :board
- (fn
-   [db _]
-   (reaction (:board @db))))
+  :board
+  (fn
+    [db _]
+    (reaction (:board @db))))
 
 (register-sub
- :snake
- (fn [db _]
-   (reaction (:body (:snake @db)))))
+  :snake
+  (fn [db _]
+    (reaction (:body (:snake @db)))))
 
 (register-sub
- :point
- (fn [db _]
-   (reaction (:point @db))))
+  :point
+  (fn [db _]
+    (reaction (:point @db))))
 
 (register-sub
   :points
@@ -123,4 +131,4 @@
     (reaction (:game-running? @db))))
 
 
- (run)
+(run)
