@@ -1,0 +1,11 @@
+**Pause the game**
+When space is hit, the game is paused, until space is hit again.
+
+**Count-down**
+Each time you eat a point, you get 50 (or so) count-donw points.
+Each game tick you luse one count-down point. When you run out, you luse
+
+**High score gallery**
+If the game is over, the highest ranking scores + names are shown
+If your socre beats the highest score, you can enter your name, and you are part of
+the ranking
