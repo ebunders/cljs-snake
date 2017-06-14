@@ -1,4 +1,4 @@
-**Pause the game**
+**Pause the game** [DONE]
 When space is hit, the game is paused, until space is hit again.
 
 **Count-down**
