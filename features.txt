@@ -1,6 +1,8 @@
 **Pause the game** [DONE]
 When space is hit, the game is paused, until space is hit again.
 
+**Make codeswapping work
+
 **Count-down**
 Each time you eat a point, you get 50 (or so) count-donw points.
 Each game tick you luse one count-down point. When you run out, you luse
