@@ -1,7 +1,7 @@
 (ns snake-game.core
   (:require-macros [reagent.ratom :refer [reaction]])
   (:require [reagent.core :as reagent :refer [atom]]
-            [re-frame.core :refer [register-handler register-sub subscribe dispatch dispatch-sync]]
+            [re-frame.core :refer [reg-event-db reg-sub-raw subscribe dispatch dispatch-sync]]
             [goog.events :as events]
             [snake-game.view :as view]
             [snake-game.logic :as logic]))
@@ -31,20 +31,27 @@
                     :snake         snake
                     :point         (logic/random-free-position snake board)
                     :points        0
-                    :game-running? true})
+                    :game-running? true
+                    :game-paused?  false})
 
+
+(defn game-active?
+  [db]
+  (and
+    (:game-running? db)
+    (not (:game-paused? db))))
 
 ;;
 ;; HANDLERS
 ;;
 
 
-(register-handler
+(reg-event-db
   :initialize
   (fn [db _]
     (merge db initial-state)))
 
-(register-handler
+(reg-event-db
   :next-state
   (fn [{:keys [snake board] :as db} _]
     (let [update-game (fn [db]
@@ -52,25 +59,29 @@
                             (update-in [:snake] logic/move-snake)
                             (as-> after-move
                                   (logic/process-move after-move))))]
-      (if (:game-running? db)
+      (if (game-active? db)
         (if (logic/collisions snake board)
           (assoc-in db [:game-running?] false)
           (update-game db))
         db
-        ))
-    ))
+        ))))
 
 
 
 
-(register-handler
+(reg-event-db
   :change-direction
   (fn [db [_ new-direction]]
-    (if (:game-running? db)
+    (if (game-active? db)
       (update-in db
                  [:snake :direction]
                  (partial logic/change-snake-direction new-direction)))))
 
+
+(reg-event-db
+  :toggle-pause
+  (fn [db _]
+    (update db :game-paused? not)))
 
 (defn game
   "the main rendering funciton"
@@ -79,7 +90,8 @@
    [view/render-board]
    [view/render-score]
    [view/render-game-over]
-   [view/render-state]])
+   [view/render-state]
+   [view/render-pause]])
 
 
 (defn run
@@ -97,38 +109,45 @@
                         (fn [e]
                           (let [key-code (.-keyCode e)]
                             (if (contains? logic/key-code->move key-code)
-                              (dispatch [:change-direction (logic/key-code->move key-code)]))))))
+                              (dispatch [:change-direction (logic/key-code->move key-code)]))
+                            (if (= key-code 32)
+                              (dispatch [:toggle-pause]))))))
 
 ;;
 ;; SUBSCRIPTIONS
 ;;
 
 
-(register-sub
+(reg-sub-raw
   :board
   (fn
     [db _]
     (reaction (:board @db))))
 
-(register-sub
+(reg-sub-raw
   :snake
   (fn [db _]
     (reaction (:body (:snake @db)))))
 
-(register-sub
+(reg-sub-raw
   :point
   (fn [db _]
     (reaction (:point @db))))
 
-(register-sub
+(reg-sub-raw
   :points
   (fn [db _]
     (reaction (:points @db))))
 
-(register-sub
+(reg-sub-raw
   :game-running?
   (fn [db _]
     (reaction (:game-running? @db))))
+
+(reg-sub-raw
+  :game-paused?
+  (fn [db _]
+    (reaction (:game-paused? @db))))
 
 
 (run)

@@ -82,9 +82,12 @@ body {
     top: 0;
     z-index: 20;
     cursor: pointer;
-
 }
 
 .play h1 {
     font-size: 100px;
+}
+
+.play h2 {
+    font-size: 30px;
 }

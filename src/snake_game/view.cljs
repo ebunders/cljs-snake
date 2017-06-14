@@ -31,11 +31,24 @@
      (fn []
        [:div.score (str "Score: " @points)])))
 
+
 (defn render-state
   "Render the status of the game"
   []
   (let [game-state (subscribe [:game-running?])]
     [:div.status (str "Game: " (if game-state "Running" "Over"))]))
+
+
+(defn render-pause
+  "Render the paused/not paused state of the game"
+  []
+  (let [paused (subscribe [:game-paused?])]
+    (fn []
+      (if @paused
+             [:div.overlay
+              [:div.play
+               [:h2 "Pause.."]]]
+             [:div]))))
 
 
 (defn render-game-over
