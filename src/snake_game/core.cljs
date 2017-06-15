@@ -1,3 +1,4 @@
+; state wordt opgeslagen in @re-frame.db/app-db
 (ns snake-game.core
   (:require-macros [reagent.ratom :refer [reaction]])
   (:require [reagent.core :as reagent :refer [atom]]
@@ -69,7 +70,7 @@
   :change-direction
   (fn [db [_ new-direction]]
     (if (game-active? db)
-      (update-in db
+        (update-in db
                  [:snake :direction]
                  (partial logic/change-snake-direction new-direction)))))
 
@@ -105,6 +106,7 @@
          (events/listen js/window "keydown"
                         (fn [e]
                           (let [key-code (.-keyCode e)]
+                            (.preventDefault e)
                             (if (contains? logic/key-code->move key-code)
                               (dispatch [:change-direction (logic/key-code->move key-code)]))
                             (if (= key-code 32)
