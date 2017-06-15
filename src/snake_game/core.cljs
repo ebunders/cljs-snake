@@ -87,7 +87,8 @@
    [view/render-score]
    [view/render-game-over]
    [view/render-state]
-   [view/render-pause]])
+   [view/render-pause]
+   ])
 
 
 (defn ^:export run

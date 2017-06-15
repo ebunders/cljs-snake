@@ -12,16 +12,15 @@
             snake-positions (into #{} @snake)
             current-point @point
             cells (for [y (range height)]
-                    (into [:tr]
+                    (into [:div.gamerow]
                           (for [x (range width)
                                 :let [current-pos [x y]]]
                             (cond
-                              (snake-positions current-pos) [:td.snake-on-cell]
-                              (= current-pos current-point) [:td.point]
-                              :else [:td.cell]))))]
+                              (snake-positions current-pos) [:div.cell.snake-on]
+                              (= current-pos current-point) [:div.cell.point "*"]
+                              :else [:div.cell]))))]
 
-        (into [:table.stage {:style {:height 377
-                                     :width 527}}]
+        (into [:div.stage ]
               cells)))))
 
 (defn render-score

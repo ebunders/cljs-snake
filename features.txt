@@ -3,7 +3,11 @@ When space is hit, the game is paused, until space is hit again.
 
 **Make codeswapping work [DONE]
 
-**Make it possible for cells to hold a character
+**Make it possible for cells to hold a character [DONE]
+
+**[BUG] cursor keys during game pause ends game.
+
+**Add little blinking animation when snake hits
 
 **Count-down**
 Each time you eat a point, you get 50 (or so) count-donw points.
