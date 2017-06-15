@@ -10,15 +10,11 @@
 
 (println "This text is printed from src/snake-game/core.cljs. Go ahead and edit it and see reloading in action.")
 
-;; define your app data so that it doesn't get over-written on reload
-
-;(defonce app-state (atom {:text "Hello world!"}))
-
 (defn on-js-reload []
-  ;; optionally touch your app-state to force rerendering depending on
-  ;; your application
-  ;; (swap! app-state update-in [:__figwheel_counter] inc)
+  (reagent/force-update-all)
   )
+
+
 (def board [35 25])
 (def snake {:direction [1 0]
             :body      [[3 2] [2 2] [1 2] [0 2]]})
@@ -94,7 +90,7 @@
    [view/render-pause]])
 
 
-(defn run
+(defn ^:export run
   "The main app function"
   []
   (dispatch-sync [:initialize])
@@ -148,6 +144,3 @@
   :game-paused?
   (fn [db _]
     (reaction (:game-paused? @db))))
-
-
-(run)

@@ -1,7 +1,7 @@
 **Pause the game** [DONE]
 When space is hit, the game is paused, until space is hit again.
 
-**Make codeswapping work
+**Make codeswapping work [DONE]
 
 **Count-down**
 Each time you eat a point, you get 50 (or so) count-donw points.
