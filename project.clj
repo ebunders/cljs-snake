@@ -11,14 +11,22 @@
                  [re-frame "0.9.4"]
                  [org.clojure/clojurescript "1.9.229"]
                  [org.clojure/core.async  "0.3.442"
-                  :exclusions [org.clojure/tools.reader]]]
+                  :exclusions [org.clojure/tools.reader]]
+                 [re-frisk "0.4.5"]
+                 [lein-doo "0.1.7"]
+                  ]
 
-  :plugins [[lein-figwheel "0.5.10"]
-            [lein-cljsbuild "1.1.5" :exclusions [[org.clojure/clojure]]]]
+  :plugins [[lein-doo "0.1.7"]
+            [lein-figwheel "0.5.10"]
+            [lein-cljsbuild "1.1.6" :exclusions [[org.clojure/clojure]]]]
 
   :source-paths ["src"]
 
-  :cljsbuild {:builds
+  :cljsbuild {
+              :test-commands {"test-once" ["lein" "doo" "phantom" "test" "once"]
+                              "test" ["lein" "doo" "phantom" "test"]
+                              }
+              :builds
               [{:id "dev"
                 :source-paths ["src"]
 
@@ -33,9 +41,9 @@
                            :open-urls ["http://localhost:3449/index.html"]}
 
                 :compiler {:main snake-game.core
-                           :asset-path "js/compiled/out"
-                           :output-to "resources/public/js/compiled/snake_game.js"
-                           :output-dir "resources/public/js/compiled/out"
+                           :asset-path "cljs/compiled/out"
+                           :output-to "resources/public/cljs/compiled/snake_game.js"
+                           :output-dir "resources/public/cljs/compiled/out"
                            :source-map-timestamp true
                            ;; To console.log CLJS data-structures make sure you enable devtools in Chrome
                            ;; https://github.com/binaryage/cljs-devtools
@@ -45,10 +53,27 @@
                ;; lein cljsbuild once min
                {:id "min"
                 :source-paths ["src"]
-                :compiler {:output-to "resources/public/js/compiled/snake_game.js"
+                :compiler {:output-to "resources/public/cljs/compiled/snake_game.js"
                            :main snake-game.core
                            :optimizations :advanced
-                           :pretty-print false}}]}
+                           :pretty-print false}}
+               {:id "test"
+                :source-paths ["src" "test"]
+                :compiler {:main runners.doo
+                           :optimizations :none
+                           :output-to "resources/public/cljs/compiled/all-tests.js"
+                           :output-dir "resources/public/cljs/compiled/tests/out"}}
+               ;{:id "devcards-test"
+               ; :source-paths ["src" "test"]
+               ; :figwheel {:devcards true}
+               ; :compiler {:main runners.browser
+               ;            :optimizations :none
+               ;            :asset-path "cljs/tests/out"
+               ;            :output-dir "resources/public/cljs/tests/out"
+               ;            :output-to "resources/public/cljs/tests/all-tests.js"
+               ;            :source-map-timestamp true}}
+
+               ]}
 
   :figwheel {;; :http-server-root "public" ;; default and assumes "resources"
              ;; :server-port 3449 ;; default
@@ -97,7 +122,7 @@
                                   [figwheel-sidecar "0.5.10"]
                                   [com.cemerick/piggieback "0.2.1"]]
                    ;; need to add dev source path here to get user.clj loaded
-                   :source-paths ["src" "dev"]
+                   :source-paths ["src" "dev" "test"]
                    ;; for CIDER
                    ;; :plugins [[cider/cider-nrepl "0.12.0"]]
                    :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
