@@ -18,8 +18,6 @@
   "Move the whole snake based on the position and direction of each snake element"
   [{:keys [direction body] :as snake}]
   (let [head-new-position (mapv + direction (first body))]
-    ;; (update snake :body #(into [] (drop-last (cons head-new-position body)))
-    ;; (assoc snake :body (into [] (drop-last (cons head-new-position body)))
     (update-in snake [:body] #(into [] (drop-last (cons head-new-position body)))))
   )
 

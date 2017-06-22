@@ -32,6 +32,9 @@ To create a production build run:
 And open your browser in `resources/public/index.html`. You will not
 get live reloading, nor a REPL.
 
+## Re-frame documentation
+https://github.com/Day8/re-frame/tree/master/docs#introduction
+
 ## License
 
 Copyright © 2014 FIXME

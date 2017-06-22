@@ -74,6 +74,10 @@ body {
     background-color: #e30b5c;
 }
 
+.snake-on.blink{
+    background-color: #ffb406;
+}
+
 .point {
     background-color: rgb(119, 255, 51);
     color: black;

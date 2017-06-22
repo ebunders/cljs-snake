@@ -7,9 +7,9 @@ When space is hit, the game is paused, until space is hit again.
 
 **[BUG] cursor keys during game pause ends game.
 
-**[BUG] cursor keys also scroll the page.
+**[BUG] cursor keys also scroll the page. [FIXED]
 
-**Add little blinking animation when snake hits
+**Add little blinking animation when snake hits [FIXED]
 
 **Count-down**
 Each time you eat a point, you get 50 (or so) count-donw points.
@@ -19,3 +19,25 @@ Each game tick you luse one count-down point. When you run out, you luse
 If the game is over, the highest ranking scores + names are shown
 If your socre beats the highest score, you can enter your name, and you are part of
 the ranking
+
+--------------------------------------------
+Add little blinking animation when snake hits
+https://github.com/Day8/re-frame/blob/5c0268411b9a293534ecbcb5e04e8e860d2c2d2f/docs/Effects.md#dispatch-later
+
+The next-state handler checks if there is a collision. now it sets :game-running to false.
+If there is no collision it moves the snake andprocesses the move.
+
+What we want: if there is a collision:
+- stop movement
+- blink the snake head a few times
+- :game-running=false
+
+with reg-event-fx we can also register effects. there are standard effects,
+like :dispatch and :dispatch-later
+
+so if the next state handler:
+ - returns a :dispatch-later to :blink-snake-head which takes a countdown value
+
+the handler for :blink-snake-head
+- updates the snake model, to reflect the state of the snake head (this can be a toggle
+- creates a :dispatch-later with a reduced counter to itself if the counter > 0
