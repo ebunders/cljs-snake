@@ -11,9 +11,9 @@
      game-config-result2 {:key-handlers {:loaded [[true true]
                                                 [true true]]}}
 
-     game-config-result3 {:key-handlers {:loaded    [[true true]
+     game-config-result3 {:key-handlers {:loaded       [[true true]
                                                    [true true]]
-                                         :running [[true true]]}}
+                                         :game-running [[true true]]}}
      ]
     (testing "The key-event api"
       (testing "should allow registration of key eventlisteners"
@@ -25,9 +25,9 @@
           (is (= 2 (count (-> result :key-handlers :loaded))) "A second handler should have been added to :loaded")
           (is (= result game-config-result2)))
 
-        (let [result (p/update-game-config-keybindings game-config-result2 :running true true)]
+        (let [result (p/update-game-config-keybindings game-config-result2 :game-running true true)]
           (is (= 2 (count (-> result :key-handlers :loaded))) "Two handlers for :loaded")
-          (is (= 1 (count (-> result :key-handlers :running))) "One handler for :running")
+          (is (= 1 (count (-> result :key-handlers :game-running))) "One handler for :running")
 
           (is (= result game-config-result3)  "A handler should be added to :running" )))
 

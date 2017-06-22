@@ -18,7 +18,7 @@
 (def pause-key 32)
 
 (defn update-game-config-keybindings [game-config game-state pred f]
-  (let [game-states [:loaded :running :paused :ended]]
+  (let [game-states [:loaded :game-running :paused :ended]]
     (if (some #{game-state} game-states)
       (update-in game-config [:key-handlers game-state] #(into [] (cons [pred f] %)))
       game-config)))

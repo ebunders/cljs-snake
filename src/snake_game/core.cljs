@@ -10,37 +10,43 @@
 
 (enable-console-print!)
 
-(println "This text is printed from src/snake-game/core.cljs. Go ahead and edit it and see reloading in action.")
+(defn log [& strs]
+  (.log js/console (reduce str (interleave strs (repeat " ")))))
 
 (defn on-js-reload []
   (reagent/force-update-all)
   )
 
+; game-state [:game-running :gamek-paused :game-finished]
+; snake-state [:snake-moving :snake-collided]
 
 (def board [35 25])
-(def snake {:direction  [1 0]
-            :body       [[3 2] [2 2] [1 2] [0 2]]
-            :ismoving?  true
-            :blink-head false})
+(def snake {:direction   [1 0]
+            :body        [[3 2] [2 2] [1 2] [0 2]]
+            :snake-state :snake-moving
+            :blink-head  false})
 
 
 
 
 (def initial-state {
-                    :board         board
-                    :snake         snake
-                    :point         (logic/random-free-position snake board)
-                    :points        0
-                    :game-running? true
-                    :game-paused?  false})
+                    :board      board
+                    :snake      snake
+                    :point      (logic/random-free-position snake board)
+                    :points     0
+                    :game-state :game-running})
 
 
-(defn game-active?
-  [db]
-  (and
-    (:game-running? db)
-    (not (:game-paused? db))
-    (:ismoving? (:snake db))))
+
+;;
+;; model utilities
+;;
+
+(defn snake-is-moving? [db] (= :snake-moving (-> db :snake :snake-state)))
+(defn game-is-running? [db] (= :game-running (:game-state db)))
+(defn game-is-paused? [db] (= :game-paused (:game-state db)))
+(defn game-is-finished? [db] (= :game-finished (:game-state db)))
+
 
 ;;
 ;; HANDLERS
@@ -57,45 +63,53 @@
   :next-state
   (fn [cofx event]
     (let [db (:db cofx)
-          {snake :snake world :world} db
+          snake (:snake db)
+          snake-state (:snake-state snake)
+          running-and-moving (and (= (:game-state db) :game-running) (= snake-state :snake-moving))
           update-game (fn [db]
                         (-> db
                             (update-in [:snake] logic/move-snake)
                             (as-> after-move
                                   (logic/process-move after-move))))]
-      (if (game-active? db)
+      (if running-and-moving
+        ;if there is a collision we switch to :snake-collided
         (if (logic/collisions snake board)
-          {:db db
-           :dispatch-later [{:ms 200 :dispatch [:blink 5]}]}
-          {:db (update-game db)})
-        {:db db}
+          {:db             (assoc-in db [:snake :snake-state] :snake-collided)
+           :dispatch-later [{:ms 200 :dispatch [:blink 5 200]}]}
+          {:db (update-game db)})                           ;; no collisions - move the game forward
+        {:db db}                                            ;; not running and moving- no change
         ))))
 
 
 (reg-event-fx
   :blink
-  (fn [cofx [_ counter]]
+  (fn [cofx [_ counter interval]]
     (let [db (:db cofx)]
       (if (> counter 0)
         {:db             (update-in db [:snake :blink-head] not)
-         :dispatch-later [{:ms 200 :dispatch [:blink (dec counter)]}]}
-        {:db (assoc-in db [:game-running?] false)}
+         :dispatch-later [{:ms interval :dispatch [:blink (dec counter) interval]}]}
+        {:db (assoc-in db [:game-state] :game-finished)}
         ))))
 
 
 (reg-event-db
   :change-direction
   (fn [db [_ new-direction]]
-    (if (game-active? db)
+
+    (if (and (game-is-running? db) (snake-is-moving? db))
+
       (update-in db
                  [:snake :direction]
-                 (partial logic/change-snake-direction new-direction)))))
+                 (partial logic/change-snake-direction new-direction))
+      db)))
 
 
 (reg-event-db
   :toggle-pause
   (fn [db _]
-    (update db :game-paused? not)))
+    (let [new-state (if (game-is-paused? db) :game-running :game-paused)]
+      (log ":toggel-pause. new state is:" new-state "game-is-paused:" (game-is-paused? db) "db:" db)
+      (assoc db :game-state new-state))))
 
 (defn game
   "the main rendering funciton"
@@ -104,7 +118,6 @@
    [view/render-board]
    [view/render-score]
    [view/render-game-over]
-   [view/render-state]
    [view/render-pause]
    ])
 
@@ -166,11 +179,6 @@
     (reaction (:points @db))))
 
 (reg-sub-raw
-  :game-running?
+  :game-state
   (fn [db _]
-    (reaction (:game-running? @db))))
-
-(reg-sub-raw
-  :game-paused?
-  (fn [db _]
-    (reaction (:game-paused? @db))))
+    (reaction (:game-state @db))))

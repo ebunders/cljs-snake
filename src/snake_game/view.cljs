@@ -7,9 +7,11 @@
   (let [snake-head (first (:body snake))
         at-snake-head? (= current-pos snake-head)
         blinking? (:blink-head snake)]
-    (.log js/console "current pos: " (str current-pos) " snake head:" (str snake-head) " blinking: " (str blinking?))
+
     (if (and blinking? at-snake-head?)
-      [:div.cell.snake-on.blink]
+      (do
+        (.log js/console "current pos: " (str current-pos) " snake head:" (str snake-head) " blinking: " (str blinking?))
+        [:div.cell.snake-on.blink])
       [:div.cell.snake-on])))
 
 (defn render-point [] [:div.cell.point "*"])
@@ -51,16 +53,18 @@
 (defn render-state
   "Render the status of the game"
   []
-  (let [game-state (subscribe [:game-running?])]
-    [:div.status (str "Game: " (if game-state "Running" "Over"))]))
+  (let [game-state (subscribe [:game-state])]
+    [:div.status (str "Game: " @game-state)]))
 
 
 (defn render-pause
   "Render the paused/not paused state of the game"
   []
-  (let [paused (subscribe [:game-paused?])]
-    (fn []
-      (if @paused
+
+  (fn []
+    (let [game-state (subscribe [:game-state])
+          game-paused? (= @game-state :game-paused)]
+      (if game-paused?
         [:div.overlay
          [:div.play
           [:h2 "Pause.."]]]
@@ -70,10 +74,12 @@
 (defn render-game-over
   "Render the game"
   []
-  (let [game-state (subscribe [:game-running?])]
-    (fn [] (if @game-state
-             [:div]
-             [:div.overlay
-              [:div.play {:on-click #(dispatch [:initialize])}
-               [:h1 "↺"]]]))))
+  (fn []
+    (let [game-state (subscribe [:game-state])
+           finished? (= :game-finished @game-state)]
+       (if finished?
+         [:div.overlay
+          [:div.play {:on-click #(dispatch [:initialize])}
+           [:h1 "↺"]]]
+         [:div]))))
 

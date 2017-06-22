@@ -62,7 +62,7 @@
     ))
 
 (defn process-move
-  "Evaluate a new snake posistion in the context of the whole game"
+  "Check if snake eats point, and if so update the score and create a new point"
   [{:keys [snake point board] :as db}]
   (if (= point (first (:body snake)))
     (-> db
