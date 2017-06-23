@@ -40,7 +40,21 @@
         (into [:div.stage]
               cells)))))
 
+(defn render-saves
+  "Render the list of saved states and the 'save' button"
+  []
+  (let [saves (subscribe [:saves])]
+    (fn []
+      (.log js/console (str "saves is: " @saves))
+      [:div
+       [:h3 "Saves:"]
+       (into [:ul] (map (fn [save]
+                          [:li
+                           [:a {:on-click #(dispatch [:load-state (second save)])}(first save)]
+                           ]) @saves))
+       [:button {:on-click #(dispatch [:save-state])} "Save state"]
 
+       ])))
 
 (defn render-score
   "Render the player's score"
@@ -65,7 +79,7 @@
     (let [game-state (subscribe [:game-state])
           game-paused? (= @game-state :game-paused)]
       (if game-paused?
-        [:div.overlay
+        [:div
          [:div.play
           [:h2 "Pause.."]]]
         [:div]))))
@@ -76,10 +90,10 @@
   []
   (fn []
     (let [game-state (subscribe [:game-state])
-           finished? (= :game-finished @game-state)]
-       (if finished?
-         [:div.overlay
-          [:div.play {:on-click #(dispatch [:initialize])}
-           [:h1 "↺"]]]
-         [:div]))))
+          finished? (= :game-finished @game-state)]
+      (if finished?
+        [:div.overlay
+         [:div.play {:on-click #(dispatch [:initialize])}
+          [:h1 "↺"]]]
+        [:div]))))
 

@@ -34,7 +34,8 @@
                     :snake      snake
                     :point      (logic/random-free-position snake board)
                     :points     0
-                    :game-state :game-running})
+                    :game-state :game-running
+                    :saves  []})
 
 
 
@@ -94,7 +95,7 @@
 
 (reg-event-db
   :change-direction
-  (fn [db [_ new-direction]]
+  (fn  [db [_ new-direction]]
 
     (if (and (game-is-running? db) (snake-is-moving? db))
 
@@ -111,6 +112,18 @@
       (log ":toggel-pause. new state is:" new-state "game-is-paused:" (game-is-paused? db) "db:" db)
       (assoc db :game-state new-state))))
 
+(reg-event-db
+  :save-state
+  (fn [db _]
+    (update db :saves #(conj % ["save" (dissoc db :saves)]))))
+
+(reg-event-db
+  :load-state
+  (fn [db [_ state]]
+    (let [saves (:saves db)]
+      (assoc state :saves saves))))
+
+
 (defn game
   "the main rendering funciton"
   []
@@ -119,6 +132,7 @@
    [view/render-score]
    [view/render-game-over]
    [view/render-pause]
+   [view/render-saves]
    ])
 
 
@@ -150,7 +164,9 @@
                                 (.preventDefault e)))
 
                             (if (= key-code 32)
-                              (dispatch [:toggle-pause]))))))
+                              (do
+                                (dispatch [:toggle-pause])
+                                (.preventDefault e)))))))
 
 ;;
 ;; SUBSCRIPTIONS
@@ -182,3 +198,8 @@
   :game-state
   (fn [db _]
     (reaction (:game-state @db))))
+
+(reg-sub-raw
+  :saves
+  (fn [db _]
+    (reaction (:saves @db))))

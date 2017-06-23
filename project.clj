@@ -14,6 +14,7 @@
                   :exclusions [org.clojure/tools.reader]]
                  [re-frisk "0.4.5"]
                  [lein-doo "0.1.7"]
+                 [binaryage/devtools "0.9.4"]
                   ]
 
   :plugins [[lein-doo "0.1.7"]
@@ -45,6 +46,7 @@
                            :output-to "resources/public/cljs/compiled/snake_game.js"
                            :output-dir "resources/public/cljs/compiled/out"
                            :source-map-timestamp true
+                           :source-map true
                            ;; To console.log CLJS data-structures make sure you enable devtools in Chrome
                            ;; https://github.com/binaryage/cljs-devtools
                            :preloads [devtools.preload]}}
@@ -52,11 +54,12 @@
                ;; production. You can build this with:
                ;; lein cljsbuild once min
                {:id "min"
-                :source-paths ["src"]
+                :source-paths ["src" "script"]
                 :compiler {:output-to "resources/public/cljs/compiled/snake_game.js"
                            :main snake-game.core
                            :optimizations :advanced
-                           :pretty-print false}}
+                           :pretty-print false
+                           }}
                {:id "test"
                 :source-paths ["src" "test"]
                 :compiler {:main runners.doo
