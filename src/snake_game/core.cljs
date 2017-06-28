@@ -6,7 +6,8 @@
             [goog.events :as events]
             [snake-game.view :as view]
             [snake-game.logic :as logic]
-            [re-frisk.core :refer [enable-re-frisk!]]))
+            [re-frisk.core :refer [enable-re-frisk!]]
+            [engine.game :as game]))
 
 (enable-console-print!)
 
@@ -124,6 +125,17 @@
       (assoc state :saves saves))))
 
 
+(reg-event-db :key-up (fn [db _] (assoc-in db [:snake :direction] [-1 0])))
+(reg-event-db :key-right (fn [db _] (assoc-in db [:snake :direction] [0 -1])))
+(reg-event-db :key-down (fn [db _] (assoc-in db [:snake :direction] [1 0])))
+(reg-event-db :key-left (fn [db _] (assoc-in db [:snake :direction] [0 1])))
+
+;;
+;; GAME BASICS
+;;
+
+
+
 (defn game
   "the main rendering funciton"
   []
@@ -136,43 +148,35 @@
    ])
 
 
+(defn start []
+  (js/setInterval #(dispatch [:next-state]) 150))
+
+
 (defn ^:export run
   "The main app function"
   []
   (dispatch-sync [:initialize])
+  (game/update-game-state :running)
   (enable-re-frisk! {:kind->id->handler? true})
   (reagent/render [game]
-                  (.getElementById js/document "app")))
+                  (.getElementById js/document "app"))
+  (start))
 
 
 ;;
-;; Js Listeners
+;; KEY EVENTS
 ;;
 
+(game/reg-key-bindings :running 32 :toggle-pause)
+(game/reg-key-bindings :running 37 :key-up)
+(game/reg-key-bindings :running 38 :key-right)
+(game/reg-key-bindings :running 39 :key-down)
+(game/reg-key-bindings :running 40 :key-left)
 
-(defonce snake-moving
-         (js/setInterval #(dispatch [:next-state]) 150))
-
-(defonce key-handler
-         (events/listen js/window "keydown"
-                        (fn [e]
-                          (let [key-code (.-keyCode e)]
-
-                            (if (contains? logic/key-code->move key-code)
-                              (do
-                                (dispatch [:change-direction (logic/key-code->move key-code)])
-                                (.preventDefault e)))
-
-                            (if (= key-code 32)
-                              (do
-                                (dispatch [:toggle-pause])
-                                (.preventDefault e)))))))
 
 ;;
 ;; SUBSCRIPTIONS
 ;;
-
-
 (reg-sub-raw
   :board
   (fn
