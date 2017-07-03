@@ -1,4 +1,4 @@
-(ns snake-game.logic)
+(ns snake-game.game.logic)
 
 (defn random-free-position
   "This function takes the snake and the board-size as arguments,
@@ -12,8 +12,6 @@
       (rand-nth free-positions))))
 
 
-;; waarom update-in ipv. update?
-;; waarom niet assoc of assoc-in
 (defn move-snake
   "Move the whole snake based on the position and direction of each snake element"
   [{:keys [direction body] :as snake}]
@@ -21,13 +19,13 @@
     (update-in snake [:body] #(into [] (drop-last (cons head-new-position body)))))
   )
 
-(def key-code->move
-  "Maps key-codes to moves"
-  {37 [-1 0]                                                ;up
-   38 [0 -1]                                                 ;right
-   39 [1 0]                                                 ;down
-   40 [0 1]                                                ;left
-   })
+;(def key-code->move
+;  "Maps key-codes to moves"
+;  {37 [-1 0]                                                ;up
+;   38 [0 -1]                                                 ;right
+;   39 [1 0]                                                 ;down
+;   40 [0 1]                                                ;left
+;   })
 
 (defn change-snake-direction
   "Return a valid new direction or the current one"

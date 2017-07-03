@@ -11,9 +11,9 @@
      game-config-result2 {:key-handlers {:loaded [[true true]
                                                 [true true]]}}
 
-     game-config-result3 {:key-handlers {:loaded       [[true true]
+     game-config-result3 {:key-handlers {:loaded        [[true true]
                                                    [true true]]
-                                         :game-running [[true true]]}}
+                                         :state-running [[true true]]}}
      ]
     (testing "The key-event api"
       (testing "should allow registration of key eventlisteners"
@@ -25,9 +25,9 @@
           (is (= 2 (count (-> result :key-handlers :loaded))) "A second handler should have been added to :loaded")
           (is (= result game-config-result2)))
 
-        (let [result (p/update-game-config-keybindings game-config-result2 :game-running true true)]
+        (let [result (p/update-game-config-keybindings game-config-result2 :state-running true true)]
           (is (= 2 (count (-> result :key-handlers :loaded))) "Two handlers for :loaded")
-          (is (= 1 (count (-> result :key-handlers :game-running))) "One handler for :running")
+          (is (= 1 (count (-> result :key-handlers :state-running))) "One handler for :running")
 
           (is (= result game-config-result3)  "A handler should be added to :running" )))
 
@@ -43,7 +43,7 @@
         (let  [state-handlers [[#(= % 1) #(%)]
                               [#(= % 2) #(%)]
                               [#(= % 2) #(%)]]]
-          (is (= true  (p/handle-key-event 1 state-handlers )) "key-code 1 should trigger handler :foo")
-          (is (= true  (p/handle-key-event 2 state-handlers )) "key-code 1 should trigger handler :foo")
-          (is (= false  (p/handle-key-event 3 state-handlers )) "key-code 1 should trigger handler :foo")
+          (is (= true (p/dispatch-events-for-key 1 state-handlers)) "key-code 1 should trigger handler :foo")
+          (is (= true (p/dispatch-events-for-key 2 state-handlers)) "key-code 1 should trigger handler :foo")
+          (is (= false (p/dispatch-events-for-key 3 state-handlers)) "key-code 1 should trigger handler :foo")
           )))))

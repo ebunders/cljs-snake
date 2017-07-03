@@ -1,6 +1,8 @@
-(ns engine.game
-  (:require [re-frame.core :refer [reg-event-db dispatch-sync dispatch]]
-            [goog.events :as events]))
+(ns snake-game.keyreg
+  (:require [re-frame.core :refer [dispatch reg-event-db]]
+            [goog.events :as events]
+            [snake-game.util :as util]))
+
 ; The game allows you to register handlers for key- game-state commbinations..
 ; - Use reg-key-bindings to register events for key and game-state combinations
 ; - Use update-game-state to set the current game state directly
@@ -25,15 +27,14 @@
 
 (defn reg-key-bindings
   [game-state key-code event]
-    (swap! game-config (fn [m]
-                         (update-in m
-                                    [:key-handlers game-state]
-                                    #(into [] (conj % [key-code event]))))))
+  (util/log "Register event: " event " to game state: " game-state " and key code: " key-code)
+  (swap! game-config (fn [m]
+                       (update-in m
+                                  [:key-handlers game-state]
+                                  #(into [] (conj % [key-code event]))))))
 
 
 (defn- dispatch-events-for-key [key-code state-handlers]
-  "Invokes the handlers for this keycode and this state
-  Returns true if some handler was executed for this key in this game state"
   (if-let [handlers-for-key (seq (filter #(= key-code (first %1)) state-handlers))]
     (do
       (doseq [[_ event] handlers-for-key] (dispatch [event]))
@@ -52,9 +53,11 @@
           game-state (:game-state db)
           state-handlers (get (:key-handlers @game-config) game-state)]
       (if (and
-            (seq? state-handlers)
+            (seq state-handlers)
             (dispatch-events-for-key key-code state-handlers))
-        (.preventDefault event)))))
+        (.preventDefault event)
+        (util/log "WARING! no key hander found for key-code " key-code " and game state " game-state )))
+    db))
 
 
 
