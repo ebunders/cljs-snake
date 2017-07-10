@@ -65,7 +65,7 @@
   (if (= point (first (:body snake)))
     (-> db
         (update-in [:snake] grow-snake)
-        (update-in [:points] inc)
+        (update-in [:points] #(+ % (:game-level db)))
         (assoc :point (random-free-position snake board)))
     db))
 

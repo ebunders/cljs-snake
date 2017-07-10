@@ -1,8 +1,23 @@
 (ns snake-game.game.events
-  (:require [re-frame.core :refer [reg-event-db reg-event-fx]]
+  (:require [re-frame.core :refer [reg-event-db reg-event-fx dispatch]]
             [snake-game.game.data :as data]
             [snake-game.game.logic :as logic]
             [snake-game.util :as util]))
+
+(reg-event-db :start-game
+              (fn [db _]
+                (let [speeds [150 125 100]
+                      game-speed (get speeds (dec (:game-level db)))]
+                  (-> db
+                      (assoc :jsinterval (js/setInterval #(dispatch [:next-state]) game-speed))
+                      (assoc :game-state :state-running)))
+                ))
+
+(reg-event-db :stop-game
+              (fn [db _]
+                (js/clearInterval (:jsinterval db))
+                (dissoc db :jsinterval)))
+
 
 (reg-event-fx
   :next-state

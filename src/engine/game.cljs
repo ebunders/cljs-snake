@@ -46,7 +46,7 @@
 ;
 
 (reg-event-db
-  :key-event
+  :keydown-event
   (fn [db [_ event]]
     (let [key-code (.-keyCode event)
           game-state (:game-state db)
@@ -62,4 +62,4 @@
 (defonce key-handler
          (events/listen js/window "keydown"
                         (fn [e]
-                          (dispatch [:key-event e]))))
+                          (dispatch [:keydown-event e]))))

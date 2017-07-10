@@ -34,3 +34,8 @@
   :saves
   (fn [db _]
     (:saves db)))
+
+(reg-sub
+  :game-level
+  (fn [db _]
+    (:game-level db)))

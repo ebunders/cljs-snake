@@ -16,6 +16,7 @@
                     :point      (logic/random-free-position snake board)
                     :points     0
                     :game-state :state-loaded
+                    :game-level 1
                     :saves      []})
 
 

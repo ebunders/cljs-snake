@@ -11,7 +11,8 @@
             [snake-game.game.events]
             [snake-game.keyreg :as keyreg]
             [snake-game.save-state :as save-state]
-            [snake-game.game.data :as data]))
+            [snake-game.game.data :as data]
+            [snake-game.util :as util]))
 
 (defn on-js-reload []
   (reagent/force-update-all)
@@ -35,6 +36,17 @@
   (fn [db [_ new-game-state]]
     (assoc db :game-state new-game-state)))
 
+(reg-event-db :level-up (fn [db _]
+                          (do
+                            (util/log "level up " (:game-level db))
+                            (update db :game-level (partial util/inc-max 3)))))
+
+(reg-event-db :level-down (fn [db _] (do
+                                       (util/log "level down " (:game-level db))
+                                       (update db :game-level (partial util/dec-min 1)))))
+
+
+
 
 
 ;;
@@ -42,7 +54,7 @@
 ;;
 
 
-
+;;todo: move all the game view fn calls to game/core
 (defn game
   "the main rendering funciton"
   []
@@ -56,9 +68,6 @@
    ])
 
 
-(defn start []
-  (js/setInterval #(dispatch [:next-state]) 150))
-
 
 (defn ^:export run
   "The main app function"
@@ -67,18 +76,26 @@
   (enable-re-frisk! {:kinde->id->handler? true})
   (reagent/render [game]
                   (.getElementById js/document "app"))
-  (start))
+  )
 
 
 ;;
 ;; KEY EVENTS
 ;;
 
-(keyreg/reg-key-bindings :state-running 32 :toggle-pause)
-(keyreg/reg-key-bindings :state-paused 32 :toggle-pause)
-(keyreg/reg-key-bindings :state-running 37 :key-up)
-(keyreg/reg-key-bindings :state-running 38 :key-right)
-(keyreg/reg-key-bindings :state-running 39 :key-down)
-(keyreg/reg-key-bindings :state-running 40 :key-left)
+(keyreg/reg-key-bindings :state-running 32 :toggle-pause :down)
+(keyreg/reg-key-bindings :state-paused 32 :toggle-pause :down)
+(keyreg/reg-key-bindings :state-running 37 :key-up :down)
+(keyreg/reg-key-bindings :state-running 38 :key-right :down)
+(keyreg/reg-key-bindings :state-running 39 :key-down :down)
+(keyreg/reg-key-bindings :state-running 40 :key-left :down)
+
+
+(keyreg/reg-key-bindings :state-loaded 40 :level-up :down)
+(keyreg/reg-key-bindings :state-loaded 38 :level-down :down)
+(keyreg/reg-key-bindings :state-loaded 32 :start-game :down)
+
+
+
 
 

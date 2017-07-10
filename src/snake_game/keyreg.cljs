@@ -26,12 +26,12 @@
 
 
 (defn reg-key-bindings
-  [game-state key-code event]
-  (util/log "Register event: " event " to game state: " game-state " and key code: " key-code)
+  [game-state key-code event up-down]
+  (util/log "Register event: " event " to game state: " game-state " and key code: " key-code " action " up-down)
   (swap! game-config (fn [m]
                        (update-in m
                                   [:key-handlers game-state]
-                                  #(into [] (conj % [key-code event]))))))
+                                  #(into [] (conj % [key-code event up-down]))))))
 
 
 (defn- dispatch-events-for-key [key-code state-handlers]
@@ -45,24 +45,45 @@
 ;
 ; EVENT HANDLERS
 ;
+(defn handle-key-event [db event up-down]
+  (let [key-code (.-keyCode event)
+        game-state (:game-state db)
+        state-handlers (->>
+                         (get (:key-handlers @game-config) game-state)
+                         (filter (fn [[_ _ ud]] (= ud up-down))))]
+    (if (and
+          (seq state-handlers)
+          (dispatch-events-for-key key-code state-handlers))
+      (do
+        (util/log "Handler(s) found for " event " and event type " up-down)
+        (.preventDefault event))
+      (util/log "WARING! no key hander found for key-code " key-code " and game state " game-state "and event type " up-down))))
+
 
 (reg-event-db
-  :key-event
+  :keydown-event
   (fn [db [_ event]]
-    (let [key-code (.-keyCode event)
-          game-state (:game-state db)
-          state-handlers (get (:key-handlers @game-config) game-state)]
-      (if (and
-            (seq state-handlers)
-            (dispatch-events-for-key key-code state-handlers))
-        (.preventDefault event)
-        (util/log "WARING! no key hander found for key-code " key-code " and game state " game-state )))
+    (handle-key-event db event :down)
+    db))
+
+(reg-event-db
+  :keyup-event
+  (fn [db [_ event]]
+    (handle-key-event db event :up)
     db))
 
 
 
 
-(defonce key-handler
+
+
+
+(defonce key-handler-down
          (events/listen js/window "keydown"
                         (fn [e]
-                          (dispatch [:key-event e]))))
+                          (dispatch [:keydown-event e]))))
+
+(defonce key-handler-up
+         (events/listen js/window "keyup"
+                        (fn [e]
+                          (dispatch [:keyup-event e]))))

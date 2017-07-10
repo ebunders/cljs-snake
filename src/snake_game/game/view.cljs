@@ -1,7 +1,8 @@
 (ns snake-game.game.view
   (:require
     [re-frame.core :refer [register-handler register-sub subscribe dispatch dispatch-sync]]
-    [snake-game.game.data :as data]))
+    [snake-game.game.data :as data]
+    [snake-game.util :as util]))
 
 (defn render-snake [current-pos snake]
   (let [snake-head (first (:body snake))
@@ -76,13 +77,22 @@
 (defn render-loading
   "render the loading page"
   []
-  (let [game-state (subscribe [:game-state])]
+  (let [game-state (subscribe [:game-state])
+        game-level (subscribe [:game-level])]
     (fn []
       (if (= @game-state :state-loaded)
-        [:div
-         [:div.play
-          [:h2 "Welcome, boy..."]
-          [:a {:on-click #(dispatch [:change-game-state :state-running])} "Click me to start"]]]
+        (let [levels (->>
+                       ["Easy" "Medium" "Hard"]
+                       (map-indexed (fn [i v] {:level    v
+                                               :i i
+                                               :game-level @game-level
+                                               :selected (= (inc i) @game-level)})))]
+          (util/log "levels: " levels)
+          [:div
+           [:div.play
+            [:h2 "Welcome, boy..."]
+            [:ol (map (fn [l] [(if (:selected l) :li.selected :li) (:level l)]) levels)]
+            [:div "Select level with arrows and use space to start"]]])
         [:div]))))
 
 

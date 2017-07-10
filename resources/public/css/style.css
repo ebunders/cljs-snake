@@ -121,3 +121,8 @@ div.gamerow {
 .play h2 {
     font-size: 30px;
 }
+
+ol li.selected{
+    background-color: white;
+    color: black;
+}
